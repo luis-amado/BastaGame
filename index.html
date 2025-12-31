@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tapple Game</title>
+    <style>
+      #letters {
+        gap: 10px;
+        width: 100%;
+        display: grid;
+        grid-template-columns: repeat(
+          auto-fill,
+          minmax(clamp(90px, 10vw, 150px), 1fr)
+        );
+      }
+    </style>
+  </head>
+  <body
+    style="
+      font-family: sans-serif;
+      display: flex;
+      align-items: center;
+      flex-direction: column;
+      justify-content: center;
+    "
+  >
+    <div>
+      <button id="start_timer" style="font-size: 40px; padding: 40px">
+        Start Game
+      </button>
+    </div>
+    <div id="timer" style="font-size: 60px"></div>
+    <br /><br />
+    <div id="letters"></div>
+
+    <script>
+      const timerEl = document.getElementById('timer');
+      const lettersEl = document.getElementById('letters');
+      const startTimerEl = document.getElementById('start_timer');
+
+      let timeLeft = 0;
+      let gameOn = false;
+
+      const time = 20;
+      const marchi_skips = 3;
+
+      startTimerEl.addEventListener('click', () => {
+        if (!gameOn) {
+          timeLeft = time;
+
+          showTime();
+
+          setInterval(() => {
+            timeLeft -= 1;
+            showTime();
+
+            if (timeLeft < 0) alert('You lost!');
+          }, 1000);
+
+          startTimerEl.hidden = true;
+
+          lettersEl.innerHTML = '';
+          for (let i = 0; i < 26 + marchi_skips; i++) {
+            let button = document.createElement('button');
+            const letter = String.fromCharCode(65 + i);
+            button.innerHTML = letter;
+
+            button.style =
+              'aspect-ratio: 1/1; width: 100%; height:100% ; font-size: 400%';
+
+            button.onclick = () => {
+              button.style.opacity = 0.5;
+              button.disabled = true;
+              timeLeft = time + 1;
+            };
+
+            lettersEl.appendChild(button);
+          }
+        }
+        gameOn = !gameOn;
+      });
+
+      function showTime() {
+        timerEl.innerHTML = `${Math.floor(timeLeft / 60)}:${(
+          timeLeft % 60
+        ).toString()}`;
+      }
+    </script>
+  </body>
+</html>
