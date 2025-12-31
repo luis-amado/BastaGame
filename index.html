@@ -2,42 +2,81 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
     <title>Tapple Game</title>
     <style>
+      /* 1. Global Box Sizing Reset: Ensures padding/borders don't increase width */
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: sans-serif;
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+        justify-content: center;
+        min-height: 100vh; /* Use min-height to center vertically properly */
+        margin: 0; /* 2. Remove default browser margins */
+        background-color: #f0f0f0;
+      }
+
       #letters {
         width: 100%;
+        max-width: 600px; /* Stop it from getting too huge on desktop */
+        padding: 10px; /* Add some spacing from the screen edge */
         display: grid;
-        grid-template-columns: repeat(5, minmax(clamp(20px, 20%, 180px), 1fr));
-        overflow-x: hidden;
+        /* 3. Use 1fr instead of % to perfectly fit the screen */
+        grid-template-columns: repeat(5, 1fr);
+        gap: 8px; /* Adds space between buttons */
       }
-      @media screen and (min-width: 450px) {
+
+      /* Desktop adjustment */
+      @media screen and (min-width: 500px) {
         #letters {
-          grid-template-columns: repeat(
-            auto-fill,
-            minmax(clamp(20px, 14%, 140px), 1fr)
-          );
+          /* auto-fit looks better than auto-fill usually for this game style */
+          grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
         }
+      }
+
+      /* Button Styling */
+      .game-btn {
+        aspect-ratio: 1/1;
+        width: 100%;
+        font-size: clamp(1.5rem, 4vw, 3rem); /* Responsive font size */
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        background: white;
+        cursor: pointer;
+        touch-action: manipulation; /* Improves touch response on mobile */
+        padding: 0; /* Remove default padding */
+      }
+
+      .game-btn:disabled {
+        opacity: 0.4;
+        background-color: #ddd;
       }
     </style>
   </head>
-  <body
-    style="
-      font-family: sans-serif;
-      display: flex;
-      align-items: center;
-      flex-direction: column;
-      justify-content: center;
-      max-width: 100vw;
-    "
-  >
+  <body>
     <div>
-      <button id="start_timer" style="font-size: 40px; padding: 40px">
+      <button
+        id="start_timer"
+        style="font-size: 30px; padding: 20px 40px; cursor: pointer"
+      >
         Start Game
       </button>
     </div>
-    <div id="timer" style="font-size: clamp(10px, 5dvw, 60px)"></div>
-    <br />
+
+    <div id="timer" style="font-size: 60px; margin: 20px 0; font-weight: bold">
+      0:20
+    </div>
+
     <div id="letters"></div>
 
     <script>
@@ -47,50 +86,74 @@
 
       let timeLeft = 0;
       let gameOn = false;
+      let timerInterval = null; // Variable to store the interval ID
 
       const time = 20;
       const marchi_skips = 3;
 
       startTimerEl.addEventListener('click', () => {
         if (!gameOn) {
+          gameOn = true; // Set game state immediately
           timeLeft = time;
-
           showTime();
 
-          setInterval(() => {
+          // Clear any existing interval just in case
+          if (timerInterval) clearInterval(timerInterval);
+
+          timerInterval = setInterval(() => {
             timeLeft -= 1;
             showTime();
 
-            if (timeLeft < 0) alert('You lost!');
+            if (timeLeft < 0) {
+              clearInterval(timerInterval); // CRITICAL FIX: Stop the timer!
+              alert('You lost!');
+              gameOn = false; // Reset game state
+              startTimerEl.hidden = false;
+              startTimerEl.innerText = 'Play Again';
+            }
           }, 1000);
 
           startTimerEl.hidden = true;
 
           lettersEl.innerHTML = '';
+
+          // Logic note: 26 + 3 = 29.
+          // Characters past Z (ASCII 90) are [ \ ]
+          // You might want to handle that specifically, but leaving as is for now.
           for (let i = 0; i < 26 + marchi_skips; i++) {
             let button = document.createElement('button');
-            const letter = String.fromCharCode(65 + i);
-            button.innerHTML = letter;
 
-            button.style =
-              'aspect-ratio: 1/1; width: 100%; height:100% ; font-size: clamp(20px, 300%, 90px)';
+            // Handle the special "Skip" characters to look nicer
+            if (i >= 26) {
+              button.innerHTML = 'Skip';
+              button.style.fontSize = 'clamp(10px, 2vw, 20px)'; // Smaller text for "Skip"
+            } else {
+              button.innerHTML = String.fromCharCode(65 + i);
+            }
+
+            // Apply class instead of inline styles for better performance
+            button.className = 'game-btn';
 
             button.onclick = () => {
-              button.style.opacity = 0.5;
-              button.disabled = true;
-              timeLeft = time + 1;
+              if (timeLeft >= 0) {
+                // Only allow click if game is active
+                button.disabled = true;
+                timeLeft = time; // Reset time back to 20
+                showTime();
+              }
             };
 
             lettersEl.appendChild(button);
           }
         }
-        gameOn = !gameOn;
       });
 
       function showTime() {
-        timerEl.innerHTML = `${Math.floor(timeLeft / 60)}:${(
-          timeLeft % 60
-        ).toString()}`;
+        // Prevent negative numbers showing briefly
+        const t = Math.max(0, timeLeft);
+        timerEl.innerHTML = `${Math.floor(t / 60)}:${(t % 60)
+          .toString()
+          .padStart(2, '0')}`;
       }
     </script>
   </body>
