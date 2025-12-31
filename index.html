@@ -28,7 +28,7 @@
 
       #letters {
         width: 100%;
-        max-width: 600px; /* Stop it from getting too huge on desktop */
+        /* max-width: 600px; Stop it from getting too huge on desktop */
         padding: 10px; /* Add some spacing from the screen edge */
         display: grid;
         /* 3. Use 1fr instead of % to perfectly fit the screen */
@@ -37,7 +37,13 @@
       }
 
       /* Desktop adjustment */
-      @media screen and (min-width: 500px) {
+      @media screen and (min-width: 750px) {
+        #letters {
+          /* auto-fit looks better than auto-fill usually for this game style */
+          grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+        }
+      }
+      @media screen and (max-height: 500px) {
         #letters {
           /* auto-fit looks better than auto-fill usually for this game style */
           grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
@@ -73,9 +79,10 @@
       </button>
     </div>
 
-    <div id="timer" style="font-size: 60px; margin: 20px 0; font-weight: bold">
-      0:20
-    </div>
+    <div
+      id="timer"
+      style="font-size: 60px; margin: 20px 0; font-weight: bold"
+    ></div>
 
     <div id="letters"></div>
 
