@@ -6,14 +6,13 @@
     <title>Tapple Game</title>
     <style>
       #letters {
-        gap: 10px;
         width: 100%;
         display: grid;
         grid-template-columns: repeat(
           auto-fill,
-          minmax(clamp(90px, 10vw, 150px), 1fr)
+          minmax(clamp(40px, 9dvw, 150px), 1fr)
         );
-        max-height: calc(100vh-50px);
+        max-height: calc(100dvh-50px);
         overflow-y: scroll;
         overflow-x: hidden;
       }
@@ -34,8 +33,8 @@
         Start Game
       </button>
     </div>
-    <div id="timer" style="font-size: 60px"></div>
-    <br /><br />
+    <div id="timer" style="font-size: clamp(10px, 5dvw, 60px)"></div>
+    <br />
     <div id="letters"></div>
 
     <script>
@@ -71,7 +70,7 @@
             button.innerHTML = letter;
 
             button.style =
-              'aspect-ratio: 1/1; width: 100%; height:100% ; font-size: 400%';
+              'aspect-ratio: 1/1; width: 100%; height:100% ; font-size: 200%';
 
             button.onclick = () => {
               button.style.opacity = 0.5;
